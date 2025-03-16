@@ -1,0 +1,82 @@
+/* Query 1-*/
+
+WITH FilmDetails AS (
+    SELECT 
+        f.title AS film_title,
+        c.name AS category_name
+    FROM 
+        film_category AS fc
+    JOIN 
+        category AS c ON fc.category_id = c.category_id
+    JOIN 
+        film AS f ON f.film_id = fc.film_id
+    JOIN 
+        inventory AS i ON i.film_id = f.film_id
+    JOIN 
+        rental AS r ON r.inventory_id = i.inventory_id
+    WHERE 
+        c.name IN ('Animation', 'Children', 'Classics', 'Comedy', 'Family', 'Music')
+)
+SELECT 
+    DISTINCT(film_title),
+    category_name,
+    COUNT(film_title) OVER (PARTITION BY film_title) AS rental_count
+FROM 
+    FilmDetails
+ORDER BY 
+    category_name;
+
+
+/* Query 2-*/
+
+    WITH FilmStatistics AS (
+    SELECT 
+        rating,
+        COUNT(*) AS film_count,
+        AVG(rental_rate) AS average_rental_rate,
+        AVG(length) AS average_length
+    FROM 
+        film
+    GROUP BY 
+        rating
+)
+SELECT 
+    rating,
+    film_count,
+    average_rental_rate,
+    average_length
+FROM 
+    FilmStatistics
+ORDER BY 
+    rating;
+
+
+/* Query 3-*/
+
+SELECT 
+    c.name AS category_name, 
+    COUNT(f.film_id) AS film_count
+FROM 
+    category AS c
+LEFT JOIN 
+    film_category AS fc ON c.category_id = fc.category_id
+LEFT JOIN 
+    film AS f ON fc.film_id = f.film_id
+GROUP BY 
+    c.category_id, 
+    c.name;
+
+
+/* Query 4-*/
+
+SELECT 
+    c.category_id, 
+    COUNT(f.film_id) AS film_count
+FROM 
+    film AS f
+JOIN 
+    film_category AS fc ON f.film_id = fc.film_id
+JOIN 
+    category AS c ON fc.category_id = c.category_id
+GROUP BY 
+    c.category_id;
